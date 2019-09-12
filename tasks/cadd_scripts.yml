@@ -1,0 +1,78 @@
+# Setup of CADD scripts.
+#
+# TODO: Data files should be installed from the cubi-cache server.
+---
+
+- name: Ensure clone target exists
+  file:
+    recurse: true
+    state: directory
+    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}
+
+- name: Clone CADD-scripts
+  git:
+    repo: 'https://github.com/kircherlab/CADD-scripts.git'
+    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}
+    version: '{{ cadd_rest_api_server_cadd_scripts_version }}'
+
+- name: Download & unpack miniconda3
+  get_url:
+    url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    dest: /srv/cadd-rest-api/Miniconda3-latest-Linux-x86_64.sh
+
+- name: Install miniconda3
+  shell: >
+    trap "rm -rf /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda" ERR;
+    bash /srv/cadd-rest-api/Miniconda3-latest-Linux-x86_64.sh
+    -b -p /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda
+  args:
+    executable: /bin/bash
+    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
+
+- name: Setup CADD-scripts environment
+  shell: |
+    source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
+    conda env create -f /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/src/environment.yml
+  args:
+    executable: /bin/bash
+    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/envs/cadd-env
+
+- name: Install precomputed scores.
+  get_url:
+    url: https://krishna.gs.washington.edu/download/CADD/{{ item.src }}
+    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}
+    remote_src: true
+  with_items:
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/whole_genome_SNVs_inclAnno.tsv.gz"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/incl_anno/whole_genome_SNVs_inclAnno.tsv.gz
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/whole_genome_SNVs_inclAnno.tsv.gz.tbi"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/incl_anno/whole_genome_SNVs_inclAnno.tsv.gz.tbi
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/InDels_inclAnno.tsv.gz"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/incl_anno/InDels_inclAnno.tsv.gz
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/InDels_inclAnno.tsv.gz.tbi"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/incl_anno/InDels_inclAnno.tsv.gz.tbi
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/whole_genome_SNVs.tsv.gz"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/no_anno/whole_genome_SNVs.tsv.gz
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/whole_genome_SNVs.tsv.gz.tbi"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/no_anno/whole_genome_SNVs.tsv.gz.tbi
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/InDels.tsv.gz"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/no_anno/InDels.tsv.gz
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/InDels.tsv.gz.tbi"
+      dest: prescored/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/no_anno/InDels.tsv.gz.tbi
+  when: not cadd_rest_api_server_skip_download
+
+- name: Download and extract data files
+  unarchive:
+    src: https://krishna.gs.washington.edu/download/CADD/{{ item.src }}
+    dest: /srv/cadd-rest-api/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}
+    creates: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}/{{ item.creates }}
+    remote_src: true
+    extra_opts:
+      - --transform
+      - "{{ item.transform }}"
+  with_items:
+    - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/annotationsGRCh37.tar.gz"
+      dest: annotations
+      creates: GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/vep/homo_sapiens/92_GRCh37/HG19_PATCH/2000001-3000000.gz
+      transform: s/^GRCh37/GRCh37_{{ cadd_rest_api_server_cadd_score_version }}/
+  when: not cadd_rest_api_server_skip_download

@@ -1,0 +1,81 @@
+---
+
+# CADD REST API Installation ==================================================
+
+- name: Create user for cadd-rest-api
+  user:
+    name: cadd-rest-api
+    home: /srv/cadd-rest-api
+    group: "{{ cadd_rest_api_server_nogroup_name }}"
+
+- name: ensure clone target exists
+  file:
+    state: directory
+    dest: "{{ item }}"
+    owner: cadd-rest-api
+    group: "{{ cadd_rest_api_server_nogroup_name }}"
+    mode: u=rwx,go=rx
+  loop:
+    - /srv
+    - /srv/cadd-rest-api
+    - /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+
+- name: Clone cadd-rest-api source code
+  git:
+    repo: 'https://github.com/bihealth/cadd-rest-api.git'
+    dest: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+    version: '{{ cadd_rest_api_server_version }}'
+  notify:
+    - restart cadd-rest-api
+  register: clone_repo
+
+# Set up virtual environment =================================================
+
+- name: Ensure virtual env target exists
+  file:
+    state: directory
+    dest: "{{ item }}"
+    owner: cadd-rest-api
+    group: "{{ cadd_rest_api_server_nogroup_name }}"
+    mode: u=rwx,go=rx
+  loop:
+    - /srv
+    - /srv/cadd-rest-api
+    - /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv
+  notify:
+    - restart cadd-rest-api
+
+- name: Create virtualenv environment
+  shell: |
+    trap "rm -rf /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv" ERR
+    virtualenv -p /usr/bin/python3.6 /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv
+  args:
+    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/activate
+  notify:
+    - restart cadd-rest-api
+
+- name: Install cadd-rest-api server.
+  shell: |
+    source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/activate
+    cd /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+    pip install -e .
+  args:
+    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/cadd-rest-server
+    executable: /bin/bash
+  notify:
+    - restart cadd-rest-api
+
+# Register site with systemd ================================================
+
+- name: Install cadd-rest-api systemd unit file
+  template:
+    src: cadd-rest-api.service.j2
+    dest: /etc/systemd/system/cadd-rest-api.service
+  notify: restart cadd-rest-api
+
+- name: Start cadd-rest-api-* systemd unit
+  systemd:
+    state: started
+    name: cadd-rest-api
+    enabled: yes
+    daemon_reload: yes

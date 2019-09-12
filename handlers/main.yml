@@ -1,0 +1,9 @@
+---
+
+- name: restart nginx
+  systemd: name=nginx state=restarted
+  tags: nginx
+
+- name: restart cadd-rest-api
+  systemd: name=cadd-rest-api state=restarted
+  tags: cadd_rest_api

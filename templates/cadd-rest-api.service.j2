@@ -1,0 +1,20 @@
+[Unit]
+Description=CADD REST API
+Requires=nginx.service
+Before=nginx.service
+
+[Service]
+User=cadd-rest-api
+Group={{ cadd_rest_api_server_nogroup_name }}
+Environment=CADD_SH=/srv/cadd-scripts/{{ cadd_rest_api_server_version }}/CADD.sh
+Environment=CADD_ENV=cadd-env
+Environment=CADD_CONDA=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
+Environment=CADD_TIMEOUT=300
+WorkingDirectory=/srv/cadd-rest-api
+KillMode=process
+Restart=always
+ExecStart=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/gunicorn -w 16 --timeout 300 -b localhost:8080 cadd_rest.api:app
+
+[Install]
+# When should this service be triggered? (this is the equivalent of SysV's runlevel 3)
+WantedBy=multi-user.target

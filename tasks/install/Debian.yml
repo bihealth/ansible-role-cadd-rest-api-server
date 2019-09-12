@@ -1,0 +1,17 @@
+---
+
+- name: install system utilities
+  apt:
+    name:
+      - unzip
+      - rsync
+      - git
+      - bzip2
+      - debianutils
+    state: present
+
+- name: install virtualenv
+  command: pip{{ cadd_rest_api_server_python_version }} install virtualenv
+  args:
+    creates: /usr/bin/virtualenv
+  changed_when: false  # hack, might go to /usr/local/bin if Python is there...

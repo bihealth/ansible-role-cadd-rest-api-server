@@ -1,0 +1,12 @@
+---
+
+cadd_rest_api_server_python_version: "3.6"
+
+# bihealth.nginx ----------------------------------------------------------------------------------
+
+nginx_reverse_proxy_port: 8080
+
+# bihealth.python3 --------------------------------------------------------------------------------
+
+python3_versions:
+  - "{{ cadd_rest_api_server_python_version }}"

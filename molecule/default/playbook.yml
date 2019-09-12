@@ -1,0 +1,35 @@
+---
+
+- name: Converge
+  hosts: all
+  pre_tasks:
+    # package setup
+    - name: update package repository (Debian)
+      apt: update_cache=true
+      when: ansible_os_family == "Debian"
+      changed_when: false  # hack for idempotency
+    - name: install ubuntu-keyring
+      apt: name=ubuntu-keyring state=present
+      when: ansible_os_family == "Debian"
+      changed_when: false  # hack for idempotency
+    - name: update package repository (Red Hat)
+      yum: update_cache=true
+      when: ansible_os_family == "RedHat"
+      changed_when: false  # hack for idempotency
+    - name: install netstat (Debian/Red Hat)
+      package: name=net-tools state=present
+      when: >
+        ansible_os_family == "Debian" or
+        ansible_os_family == "RedHat"
+    # basic setup / fixes
+    - name: basic server setup (includes locale)
+      include_role:
+        name: bihealth.basic_server
+  vars:
+    # bihealth.cadd_rest_api_server ---------------------------------------------------------------
+    cadd_rest_api_server_version: v0.1.1
+    # bihealth.ssl_certs --------------------------------------------------------------------------
+    ssl_certs_certs:
+      - name: instance
+  roles:
+    - role: ansible-role-cadd-rest-api-server
