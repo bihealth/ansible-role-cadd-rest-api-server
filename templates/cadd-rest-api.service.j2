@@ -6,7 +6,7 @@ Before=nginx.service
 [Service]
 User=cadd-rest-api
 Group={{ cadd_rest_api_server_nogroup_name }}
-Environment=CADD_SH=/srv/cadd-scripts/{{ cadd_rest_api_server_version }}/CADD.sh
+Environment=CADD_SH=/srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/CADD.sh
 Environment=CADD_ENV=cadd-env
 Environment=CADD_CONDA=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
 Environment=CADD_TIMEOUT=300
