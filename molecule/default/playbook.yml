@@ -28,6 +28,7 @@
   vars:
     # bihealth.cadd_rest_api_server ---------------------------------------------------------------
     cadd_rest_api_server_version: v0.1.1
+    cadd_rest_api_server_skip_download: true  # for testing only
     # bihealth.ssl_certs --------------------------------------------------------------------------
     ssl_certs_certs:
       - name: instance

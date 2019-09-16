@@ -14,4 +14,4 @@ cadd_rest_api_server_cadd_scripts_version: master
 cadd_rest_api_server_cadd_score_version: v1.4
 
 # Disable download of large files (useful for testing).
-cadd_rest_api_server_skip_download: true
+cadd_rest_api_server_skip_download: false
