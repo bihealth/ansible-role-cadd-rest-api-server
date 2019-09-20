@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.0
+
+- Adapted to CADD API Server v0.2.0 Django & Celery implementation.
+
 ## v0.1.2
 
 - Downloading data by default (and only disabling in test).

@@ -7,3 +7,6 @@
 - name: restart cadd-rest-api
   systemd: name=cadd-rest-api state=restarted
   tags: cadd_rest_api
+
+- name: restart cadd-rest-api-celeryd
+  systemd: name=cadd-rest-api-celeryd state=restarted

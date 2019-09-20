@@ -5,7 +5,13 @@
 # The version of cadd_rest_api to install.
 # cadd_rest_api_server_version: __version__
 
+# The secret key to use.
+# cadd_rest_api_server_django_secret_key: none
+
 # Other Settings (the defaults are sensible for most cases) ---------------------------------------
+
+# The number of Celery workers.
+cadd_rest_api_server_celery_workers: 4
 
 # CADD-scripts does not use versioning (yet).
 cadd_rest_api_server_cadd_scripts_version: master

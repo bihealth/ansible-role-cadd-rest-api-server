@@ -5,3 +5,4 @@
 - src: bihealth.ssl_certs
 - src: bihealth.ssh_keys
 - src: bihealth.python3
+- src: bihealth.redis

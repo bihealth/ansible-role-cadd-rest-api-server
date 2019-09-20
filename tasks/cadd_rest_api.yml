@@ -27,6 +27,7 @@
     version: '{{ cadd_rest_api_server_version }}'
   notify:
     - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
   register: clone_repo
 
 # Set up virtual environment =================================================
@@ -44,6 +45,7 @@
     - /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv
   notify:
     - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
 
 - name: Create virtualenv environment
   shell: |
@@ -51,31 +53,101 @@
     virtualenv -p /usr/bin/python3.6 /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv
   args:
     creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/activate
+  register: venv_created
   notify:
     - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
 
-- name: Install cadd-rest-api server.
+- name: Install site requirements in virtualenv.
+  environment:
+    DJANGO_ALLOWED_HOSTS: "*"
+    DJANGO_SECRET_KEY: "{{ cadd_rest_api_server_django_secret_key }}"
+    DJANGO_SETTINGS_MODULE: "config.settings.production"
+    DATABASE_URL: "{{ cadd_rest_api_db }}"
+    LC_ALL: en_US.UTF-8
+  shell: |
+    set -xeo pipefail
+    trap "rm -rf /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv" ERR
+    source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/activate
+    pip install -r requirements/production.txt
+  args:
+    executable: /bin/bash
+    chdir: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+  when: venv_created.changed or clone_repo.changed
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
+  tags: [skip_ansible_lint]  # TODO: move to handler?
+
+# We will always migrate...
+- name: Migrate database
+  environment:
+    DJANGO_ALLOWED_HOSTS: "*"
+    DJANGO_SECRET_KEY: "{{ cadd_rest_api_server_django_secret_key }}"
+    DJANGO_SETTINGS_MODULE: "config.settings.production"
+    DATABASE_URL: "{{ cadd_rest_api_db }}"
+    LC_ALL: en_US.UTF-8
   shell: |
     source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/activate
-    cd /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
-    pip install -e .
+    python manage.py migrate
+    chown cadd-rest-api:{{ cadd_rest_api_server_nogroup_name }} {{ cadd_rest_api_db }}
   args:
-    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/cadd-rest-server
     executable: /bin/bash
+    chdir: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
   notify:
     - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
+  changed_when: false  # hack
 
 # Register site with systemd ================================================
+
+- name: Create directory for logs
+  file:
+    state: directory
+    dest: /var/log/celery
+    owner: "cadd-rest-api"
+    group: "{{ cadd_rest_api_server_nogroup_name }}"
+
+- name: Install cadd-rest-api-env.sh
+  template:
+    src: cadd-rest-api-env.sh.j2
+    dest: /etc/systemd/system/cadd-rest-api-env.sh
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
 
 - name: Install cadd-rest-api systemd unit file
   template:
     src: cadd-rest-api.service.j2
     dest: /etc/systemd/system/cadd-rest-api.service
-  notify: restart cadd-rest-api
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
 
-- name: Start cadd-rest-api-* systemd unit
+- name: Install celeryd systemd unit files
+  template:
+    src: "cadd-rest-api-celeryd.service.j2"
+    dest: /etc/systemd/system/cadd-rest-api-celeryd.service
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
+
+- name: Start cadd-rest-api systemd
   systemd:
     state: started
     name: cadd-rest-api
     enabled: yes
     daemon_reload: yes
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd
+
+- name: Start and enable celeryd systemd
+  systemd:
+    state: started
+    name: cadd-rest-api-celeryd
+    enabled: true
+    daemon_reload: true
+  notify:
+    - restart cadd-rest-api
+    - restart cadd-rest-api-celeryd

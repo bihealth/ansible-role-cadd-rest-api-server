@@ -26,5 +26,6 @@ galaxy_info:
     - cadd
 
 dependencies:
+  - role: bihealth.redis
   - role: bihealth.nginx
   - role: bihealth.python3
