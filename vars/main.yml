@@ -10,3 +10,5 @@ nginx_reverse_proxy_port: 8080
 
 python3_versions:
   - "{{ cadd_rest_api_server_python_version }}"
+
+cadd_rest_api_db: "/srv/cadd_rest_api.db"

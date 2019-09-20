@@ -1,0 +1,28 @@
+[Unit]
+Description=CADD REST API Celery Daemon
+Requires=nginx.service redis.service cadd-rest-api.service
+Before=nginx.service redis.service cadd-rest-api.service
+
+[Service]
+RuntimeDirectory=celery
+User=cadd-rest-api
+Group={{ cadd_rest_api_server_nogroup_name }}
+EnvironmentFile=/etc/systemd/system/cadd-rest-api-env.sh
+WorkingDirectory=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+PIDFile=/var/run/celery/cadd-rest-api-worker.pid
+Type=forking
+KillMode=process
+Restart=always
+ExecStart=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/celery \
+    worker \
+    --app config.celery_app \
+    --concurrency {{ cadd_rest_api_server_celery_workers }} \
+    --hostname worker-cadd-rest-api@%%h \
+    --loglevel info \
+    --logfile=/var/log/celery/cadd-rest-api-worker%%I.log \
+    --pid=/var/run/celery/cadd-rest-api-worker.pid \
+    --detach
+
+[Install]
+# When should this service be triggered? (this is the equivalent of SysV's runlevel 3)
+WantedBy=multi-user.target

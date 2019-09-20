@@ -29,6 +29,12 @@
     executable: /bin/bash
     creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
 
+- name: Fix miniconda3
+  replace:
+    path: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/etc/profile.d/conda.sh
+    regexp: '\$PS1'
+    replace: '${PS1:-}'
+
 - name: Setup CADD-scripts environment
   shell: |
     source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate

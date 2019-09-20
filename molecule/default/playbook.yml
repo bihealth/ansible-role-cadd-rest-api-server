@@ -27,8 +27,9 @@
         name: bihealth.basic_server
   vars:
     # bihealth.cadd_rest_api_server ---------------------------------------------------------------
-    cadd_rest_api_server_version: v0.1.1
-    cadd_rest_api_server_skip_download: true  # for testing only
+    cadd_rest_api_server_django_secret_key: notsecret
+    cadd_rest_api_server_version: v0.2.0
+    cadd_rest_api_server_skip_download: true
     # bihealth.ssl_certs --------------------------------------------------------------------------
     ssl_certs_certs:
       - name: instance
