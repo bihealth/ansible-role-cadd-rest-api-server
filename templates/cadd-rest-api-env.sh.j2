@@ -6,6 +6,6 @@ DJANGO_ALLOWED_HOSTS="*"
 DJANGO_SECRET_KEY="{{ cadd_rest_api_server_django_secret_key }}"
 DJANGO_SETTINGS_MODULE="config.settings.production"
 
-CADD_SH=/srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/CADD.sh
-CADD_CONDA=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
+CADD_SH={{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/CADD.sh
+CADD_CONDA={{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/bin/activate
 CADD_TIMEOUT=300

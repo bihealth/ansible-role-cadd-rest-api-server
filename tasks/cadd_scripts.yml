@@ -7,46 +7,46 @@
   file:
     recurse: true
     state: directory
-    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}
+    dest: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}"
 
 - name: Clone CADD-scripts
   git:
     repo: 'https://github.com/kircherlab/CADD-scripts.git'
-    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}
+    dest: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}"
     version: '{{ cadd_rest_api_server_cadd_scripts_version }}'
 
 - name: Download & unpack miniconda3
   get_url:
     url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    dest: /srv/cadd-rest-api/Miniconda3-latest-Linux-x86_64.sh
+    dest: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/Miniconda3-latest-Linux-x86_64.sh"
 
 - name: Install miniconda3
   shell: >
-    trap "rm -rf /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda" ERR;
-    bash /srv/cadd-rest-api/Miniconda3-latest-Linux-x86_64.sh
-    -b -p /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda
+    trap "rm -rf {{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda" ERR;
+    bash {{ cadd_rest_api_server_install_path }}/../cadd-scripts/Miniconda3-latest-Linux-x86_64.sh
+    -b -p {{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda
   args:
     executable: /bin/bash
-    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
+    creates: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/bin/activate"
 
 - name: Fix miniconda3
   replace:
-    path: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/etc/profile.d/conda.sh
+    path: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/etc/profile.d/conda.sh"
     regexp: '\$PS1'
     replace: '${PS1:-}'
 
 - name: Setup CADD-scripts environment
   shell: |
-    source /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/bin/activate
-    conda env create -f /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/src/environment.yml
+    source {{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/bin/activate
+    conda env create -f {{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/src/environment.yml
   args:
     executable: /bin/bash
-    creates: /srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-conda/envs/cadd-env
+    creates: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/envs/cadd-env"
 
 - name: Install precomputed scores.
   get_url:
     url: https://krishna.gs.washington.edu/download/CADD/{{ item.src }}
-    dest: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}
+    dest: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}"
     remote_src: true
   with_items:
     - src: "{{ cadd_rest_api_server_cadd_score_version }}/GRCh37/whole_genome_SNVs_inclAnno.tsv.gz"
@@ -70,8 +70,8 @@
 - name: Download and extract data files
   unarchive:
     src: https://krishna.gs.washington.edu/download/CADD/{{ item.src }}
-    dest: /srv/cadd-rest-api/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}
-    creates: /srv/cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}/{{ item.creates }}
+    dest: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}"
+    creates: "{{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/data/{{ item.dest }}/{{ item.creates }}"
     remote_src: true
     extra_opts:
       - --transform

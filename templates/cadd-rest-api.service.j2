@@ -7,10 +7,10 @@ Before=nginx.service
 User=cadd-rest-api
 Group={{ cadd_rest_api_server_nogroup_name }}
 EnvironmentFile=/etc/systemd/system/cadd-rest-api-env.sh
-WorkingDirectory=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}
+WorkingDirectory={{ cadd_rest_api_server_install_path }}/{{ cadd_rest_api_server_version }}
 KillMode=process
 Restart=always
-ExecStart=/srv/cadd-rest-api/{{ cadd_rest_api_server_version }}-venv/bin/gunicorn -w 16 --timeout 300 -b 127.0.0.1:8080 config.wsgi
+ExecStart={{ cadd_rest_api_server_install_path }}/{{ cadd_rest_api_server_version }}-venv/bin/gunicorn -w 16 --timeout 300 -b 127.0.0.1:8080 config.wsgi
 
 [Install]
 # When should this service be triggered? (this is the equivalent of SysV's runlevel 3)

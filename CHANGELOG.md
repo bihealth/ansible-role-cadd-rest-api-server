@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.0
+
+- Making install path configurable.
+- Fixing installation of virtualenv in sudo.
+
 ## v0.2.0
 
 - Adapted to CADD API Server v0.2.0 Django & Celery implementation.

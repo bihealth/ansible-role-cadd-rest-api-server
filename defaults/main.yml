@@ -10,6 +10,9 @@
 
 # Other Settings (the defaults are sensible for most cases) ---------------------------------------
 
+# The base install path.
+cadd_rest_api_server_install_path: /srv/cadd-rest-api
+
 # The number of Celery workers.
 cadd_rest_api_server_celery_workers: 4
 
