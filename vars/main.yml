@@ -7,4 +7,4 @@ cadd_rest_api_server_python_version: "3.6"
 python3_versions:
   - "{{ cadd_rest_api_server_python_version }}"
 
-cadd_rest_api_db: "{{ cadd_rest_api_server_install_path }}/../cadd_rest_api.db"
+cadd_rest_api_db: "{{ cadd_rest_api_server_install_path }}/{{ cadd_rest_api_server_version }}/cadd_rest_api.db"

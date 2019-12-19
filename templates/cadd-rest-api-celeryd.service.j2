@@ -15,6 +15,7 @@ KillMode=process
 Restart=always
 ExecStart={{ cadd_rest_api_server_install_path }}/{{ cadd_rest_api_server_version }}-venv/bin/celery \
     worker \
+    --broker "{{ cadd_rest_api_server_celery_broker_url }}" \
     --app config.celery_app \
     --concurrency {{ cadd_rest_api_server_celery_workers }} \
     --hostname worker-cadd-rest-api@%%h \

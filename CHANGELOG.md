@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.1
+
+- More fixes and adjustments.
+- Making celery broker URL configurable.
+
 ## v0.4.0
 
 - Removing dependency on nginx.

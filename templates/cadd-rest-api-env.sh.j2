@@ -5,7 +5,10 @@ DATABASE_URL={{ cadd_rest_api_db }}
 DJANGO_ALLOWED_HOSTS="*"
 DJANGO_SECRET_KEY="{{ cadd_rest_api_server_django_secret_key }}"
 DJANGO_SETTINGS_MODULE="config.settings.production"
+DJANGO_SECURE_SSL_REDIRECT={{ 1 if cadd_rest_api_server_force_ssl else 0 }}
 
 CADD_SH={{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}/CADD.sh
 CADD_CONDA={{ cadd_rest_api_server_install_path }}/../cadd-scripts/{{ cadd_rest_api_server_cadd_scripts_version }}-conda/bin/activate
 CADD_TIMEOUT=300
+
+CELERY_BROKER_URL={{ cadd_rest_api_server_celery_broker_url }}
