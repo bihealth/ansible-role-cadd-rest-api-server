@@ -27,5 +27,4 @@ galaxy_info:
 
 dependencies:
   - role: bihealth.redis
-  - role: bihealth.nginx
   - role: bihealth.python3

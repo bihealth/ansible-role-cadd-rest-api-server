@@ -24,3 +24,9 @@ cadd_rest_api_server_cadd_score_version: v1.4
 
 # Disable download of large files (useful for testing).
 cadd_rest_api_server_skip_download: false
+
+# Host of CADD REST API Server.
+cadd_rest_api_server_host: "127.0.0.1"
+
+# Port of CADD REST API Server.
+cadd_rest_api_server_port: "8080"
